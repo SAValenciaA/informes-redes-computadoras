@@ -1,0 +1,62 @@
+# Build directory
+
+build/*
+!build/.gitkeep
+_minted/
+
+# LaTeX auxiliary files
+
+*.aux
+*.pdf
+*.bbl
+*.bcf
+*.blg
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.toc
+*.run.xml
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+
+# Bibliography intermediate files
+
+*.bib.bak
+
+# Glossaries / nomenclature
+
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+
+# Index files
+
+*.idx
+*.ilg
+*.ind
+
+# Temporary files
+
+*.tmp
+*.bak
+
+# Latexmk cleanup
+
+latexmkrc~
+
+# VSCode local settings (optional)
+
+.vscode/*.log
+.vscode/*.aux
+
+# OS junk
+
+.DS_Store
+Thumbs.db

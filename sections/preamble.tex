@@ -1,0 +1,62 @@
+% !TEX root =../main.tex
+
+% PREÁMBULO (Mover a preamble.tex si se desea)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage{bookmark}
+\usepackage{hyperref}
+\usepackage{xurl}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{minted}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\usetikzlibrary{calc}
+\usepackage{xstring}
+
+
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{hyperref}
+
+% Formato IEEE para referencias
+\usepackage[style=ieee, backend=biber]{biblatex}
+
+\addbibresource{./referencias.bib}
+
+\newcommand{\hex}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\usemintedstyle{tango}
+\definecolor{codeBg}{HTML}{282822}
+\definecolor{textBg}{HTML}{1c1c17}
+
+\setminted{
+    breaklines=true,
+    encoding=utf8,
+    fontsize=\footnotesize,
+    frame=none,
+}
+
+\usepackage{tcolorbox}
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{minted}%
+     {\begin{tcolorbox}}%
+\AfterEndEnvironment{minted}
+   {\end{tcolorbox}}%
+
