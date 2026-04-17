@@ -1,6 +1,39 @@
 % !TEX root =../main.tex
-
 \section{Desarrollo}
 
-\cite{commandos_cisco}
+Se explicara el procedimiento desarrollado para realizar el laboratorio 4: spanning
+tree protocol. Este fue hecho utilizando los switches Catalyst 2960 de la marca Cisco
+para diferenciar los protocolos Per VLAN Spannning Tree Protocol (PVSTP) y Rapid
+Spanning Tree Protocol (RSTP). Ambos protocolos fueron probados usando la misma
+topologia que se muestra en la figura \ref{fig:topology}.
 
+\begin{figure}
+  \center
+  \input{sections/topology}
+  \caption{Diagrama de la topologia de red.}
+  \label{fig:topology}
+\end{figure}
+
+Primero---y para ambas partes---se realizo la topologia mencionada con las
+conexiones en la Table \ref{tab:conn}.
+
+\begin{center}
+  \begin{tabular}{ l c c c c }
+    \hline
+    \texttt{Puerto}            & Switch-A & Switch-B  & Switch-C  & Switch-D \\
+    \hline
+    \texttt{FastEthernet/1}    & PC-A     & PC-B      & PC-C      & PC-D     \\
+    \texttt{GigabitEthernet/1} & Switch-B & Switch-A  & Switch-D  & Switch-C \\
+    \texttt{FastEthernet/2}    & Switch-C & Switch-C  & Switch-A  & Switch-A \\
+    \texttt{FastEthernet/3}    & Switch-D & Switch-D  & Switch-B  & Switch-B \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Conexiones fisicas entre dispositivos.}
+  \label{tab:conn}
+\end{center}
+
+Una vez montada la red, las 2 partes del laboratorio empiezan a diverger.
+
+\input{sections/desarrollo_A.tex}
+
+\input{sections/desarrollo_B.tex}

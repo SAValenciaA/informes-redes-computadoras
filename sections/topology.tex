@@ -1,0 +1,35 @@
+% !TEX root =../main.tex
+
+\begin{tikzpicture}[
+    node distance=3cm,
+    every node/.style={align=center}
+]
+% Switches
+    \node (A) at (0,2) {\includegraphics[width=1.5cm]{figures/cisco/workgroup_switch.pdf}\\\texttt{Switch-A}};
+    \node (B) at (5,2) {\includegraphics[width=1.5cm]{figures/cisco/workgroup_switch.pdf}\\\texttt{Switch-B}};
+    \node (C) at (0,-2) {\includegraphics[width=1.5cm]{figures/cisco/workgroup_switch.pdf}\\\texttt{Switch-C}};
+    \node (D) at (5,-2) {\includegraphics[width=1.5cm]{figures/cisco/workgroup_switch.pdf}\\\texttt{Switch-D}};
+
+    % PCs (moved farther away)
+    \node (PCA) at (-4,4) {\includegraphics[width=1.2cm]{figures/cisco/pc.pdf}\\\texttt{PC-A}\\\texttt{192.168.1.1/24}};
+    \node (PCB) at (9,4) {\includegraphics[width=1.2cm]{figures/cisco/pc.pdf}\\\texttt{PC-B}\\\texttt{192.168.1.2/24}};
+    \node (PCC) at (-4,-4) {\includegraphics[width=1.2cm]{figures/cisco/pc.pdf}\\\texttt{PC-C}\\\texttt{192.168.1.3/24}};
+    \node (PCD) at (9,-4) {\includegraphics[width=1.2cm]{figures/cisco/pc.pdf}\\\texttt{PC-D}\\\texttt{192.168.1.4/24}};
+
+    % PC to switch links
+    \draw (PCA) -- (A);
+    \draw (PCB) -- (B);
+    \draw (PCC) -- (C);
+    \draw (PCD) -- (D);
+
+    % Switch interconnections (square)
+    \draw[dashed] (A) -- (B);
+    \draw[dashed] (B) -- (D);
+    \draw[dashed] (D) -- (C);
+    \draw[dashed] (C) -- (A);
+
+    % Diagonals
+    \draw[dashed] (A) -- (D);
+    \draw[dashed] (B) -- (C);
+
+\end{tikzpicture}

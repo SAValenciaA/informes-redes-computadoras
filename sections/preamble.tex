@@ -37,26 +37,128 @@
 % Formato IEEE para referencias
 \usepackage[style=ieee, backend=biber]{biblatex}
 
+
 \addbibresource{./referencias.bib}
 
 \newcommand{\hex}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
 
-\usemintedstyle{tango}
-\definecolor{codeBg}{HTML}{282822}
-\definecolor{textBg}{HTML}{1c1c17}
+\definecolor{red}{HTML}{B04A4A}
+\definecolor{blue}{HTML}{4A6FA5}
+\definecolor{yellow}{HTML}{C9A227}
+\definecolor{purple}{HTML}{7A5C99}
 
-\setminted{
+% Cisco terminal env
+\usepackage[dvipsnames]{xcolor}
+\definecolor{strings}{HTML}{ee8888}
+\definecolor{comments}{HTML}{ffffff}
+\definecolor{prompt}{HTML}{8888ee}
+\definecolor{keywords}{HTML}{fcff95}
+\definecolor{background}{HTML}{000000}
+\definecolor{numbers}{HTML}{a884e0}
+\definecolor{rfc}{HTML}{4e85cd}
+\definecolor{defaulttext}{HTML}{eeeeee}
+ 
+\usepackage{listings}
+\makeatletter
+\DeclareRobustCommand{\filename}[1]{
+    \begingroup
+        \def\textendash{-}
+        \filename@parse{#1}
+        \edef\filename@base{\detokenize\expandafter{\filename@base}}
+        \filename@base.\filename@ext
+    \endgroup
+}
+\makeatother
+\lstdefinestyle{default}{
+    backgroundcolor=\color{background},
+    breakatwhitespace=true,
     breaklines=true,
-    encoding=utf8,
-    fontsize=\footnotesize,
-    frame=none,
+    basicstyle=\ttfamily\small\color{defaulttext},
+    commentstyle=\color{comments},
+    keywordstyle=\color{keywords},
+    numberstyle=\color{numbers},
+    rulecolor=\color{numbers},
+    deletekeywords={},
+    escapeinside={}{},
+    extendedchars=true,
+    frame=lines,
+    keepspaces=true,
+    morekeywords={},
+    numbers=left,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    stepnumber=1,
+    stringstyle=\color{strings},
+    tabsize=2,
+    title=\filename{\lstname}
+}
+ 
+\lstset{
+    style=default,
+}
+ 
+\lstdefinelanguage{cisco-terminal}{
+    basicstyle=\ttfamily\footnotesize\color{prompt},
+    morecomment=[l][\color{defaulttext}]{\#},
+    morecomment=[l][\color{defaulttext}]{>},
+    morecomment=[s][\color{strings}]{'}{'},
+    numbers=left
 }
 
 \usepackage{tcolorbox}
-\usepackage{etoolbox}
-\BeforeBeginEnvironment{minted}%
-     {\begin{tcolorbox}}%
-\AfterEndEnvironment{minted}
-   {\end{tcolorbox}}%
+\tcbuselibrary{listings, skins}
+\definecolor{boxbg}{HTML}{000000} % black background
+\definecolor{boxborder}{HTML}{FFFFFF} % optional border colo
 
+\newtcblisting{darkcode}[1][]{
+    listing only,
+    colback=boxbg,       % box background color
+    boxrule=0pt,
+    title=\texttt{#1},
+    coltitle=white,
+    colbacktitle=black,
+    colframe=boxbg,
+    toptitle=3mm,        % padding above title text
+    bottomtitle=3mm,     % padding below title text
+    listing options={
+        language=cisco-terminal,
+        basicstyle=\ttfamily\footnotesize\color{prompt},
+        commentstyle=\color{comments},
+        keywordstyle=\color{keywords},
+        numberstyle=\color{numbers},
+        rulecolor=\color{numbers},
+        deletekeywords={},
+        escapeinside={}{},
+        extendedchars=true,
+        numbers=none,
+        breaklines=true,
+        keepspaces=true,
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        tabsize=2,
+        title=#1,
+        frame=none,
+        morekeywords={config}
+    },
+    colframe=boxborder,  % border color
+    left=10pt,            % padding inside the box
+    right=10pt,
+    top=10pt,
+    bottom=10pt,
+    arc=10pt,             % slightly rounded corners
+}
+
+% swa -> switch A
+% swaA -> Switch A en la parte A
+\newcommand{\swaA}{\textcolor{blue}{\small\texttt{001d.718a.4700}}}
+\newcommand{\swbA}{\textcolor{yellow}{\small\texttt{0026.0af1.6b00}}}
+\newcommand{\swcA}{\textcolor{purple}{\small\texttt{001d.7166.f180}}}
+\newcommand{\swdA}{\textcolor{red}{\small\texttt{001c.f6b4.2480}}}
+% swaB -> Switch A en la parte B
+\newcommand{\swaB}{\textcolor{blue}{\small\texttt{046c.9dbe.f500}}}
+\newcommand{\swbB}{\textcolor{yellow}{\small\texttt{dcce.c109.5580}}}
+\newcommand{\swcB}{\textcolor{purple}{\small\texttt{b4a8.b95d.3180}}}
+\newcommand{\swdB}{\textcolor{red}{\small\texttt{001d.7166.f180}}}

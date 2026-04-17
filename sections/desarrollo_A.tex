@@ -1,0 +1,222 @@
+% !TEX root =../main.tex
+
+\subsection*{Part A: PVSTP}
+
+Con la red montada, se conecto un computador ajeno al laboratorio y se empezo a
+configurar uno a uno los switches, los comandos utilizados en general se presentan a 
+continuacion.
+
+\begin{darkcode}[Switch-X: Configuracion basica]
+Switch-Y>ena
+Switch-Y#config t
+'
+Enter configuration commands, one per line.  End with CNTL/Z.
+'
+Switch-Y(config)#hostname Switch-X
+Switch-X(config)#spanning-tree mode pvst
+Switch-X(config)# exit
+Switch-X#show c
+Switch-X#show spanning-tree 
+'
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     \swdA
+             Cost        19
+             Port        3 (FastEthernet0/3)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0026.0af1.6b00
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  15  sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- ------
+Fa0/1               Desg FWD 19        128.1    P2p 
+Fa0/2               Altn BLK 19        128.2    P2p 
+Fa0/3               Root FWD 19        128.3    P2p 
+Gi0/1               Altn BLK 19        128.25   P2p 
+'
+\end{darkcode}
+
+Siendo este el ultimo mensaje del que se determino la informacion mas relevante. Pero
+tambien donde se encontraron los primeros problemas. En el ejemplo anterior se hace la
+configuracion basica del dispositivo: entrar a modo privilegiado y cambiar el nombre
+del switch. Luego se corre el comando \texttt{spanning-tree mode pvst} para entrar en
+modo PVSTP.
+
+Entonces se salio del modo de configuracion global para comprobar que se configuro
+y conecto el switch usando el comand \texttt{show spanning-tree}. En el ejemplo se
+muestran los resultados the \texttt{show spanning-tree} del switch B. Estos dicen que
+en el puerto \texttt{Fa0/1} el designado---el computador---, el
+\texttt{Fa0/2} un alternativo,  en \texttt{Gi0/1} otro alternativo y en \texttt{Fa0/3}
+el root--el switch D---.
+
+Si se obervan los mismo valores en otros switches se ve que todos apuntan al switch D
+como el root y otros switches que no son el D como alternativos. Mientras que la PC
+simpre es designado.
+
+Pero ese mensaje no fue el originalmente recibido al primer intento, cuando se
+hicieronn las conexiones se encontraron multiples cables que no funcionaban
+adecuadamente de los que no pasaban las señales, la conexion \texttt{Fa0/1} no la podia
+\textit{ver} el switch. Por tanto, por cada uno de los switch que le faltaba
+informacion, se reviso el cable que impedia la conexion usando un prober y se cambio si
+el prober indicaba un daño fisico.
+
+Cabe anotar el hecho de que si la conexion al switch root D estaba dañada, el
+resultado era tomar un switch alternativo y cambiarlo a root.
+
+Una vez se arreglaron todas las conexiones, se corrio el mismo ultimo comando que en
+el ejemplo anterior,
+\texttt{show spanning-tree}, y se dejo en la tabla \ref{tab:spanning-tree-before} la
+informacion recolectada y se dejo aparte en la table
+\ref{tab:spanning-tree-roles-before} los roles de cada switch acorde a los otros
+switch.
+
+\begin{center}
+  \begin{tabular}{ l c c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C & Switch-D \\
+    \hline
+    MAC & \swaA & \swbA & \swcA & \swdA \\
+    BID & \swaA & \swbA & \swcA & \swdA \\
+    Root bridge & \swdA & \swdA & \swdA & No tiene \\
+    Path cost hasta\\ el Root bridge & 19 & 19 & 25 & --- \\
+    Root port & Fa0/3 & Fa0/3 & Gi0/1 & No tiene \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Informacion de cada switch acerca del Spanning Tree.}
+  \label{tab:spanning-tree-before}
+\end{center}
+
+\begin{center}
+  \begin{tabular}{ c c c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C & Switch-D \\
+    \hline
+    Switch-A & Alt & Alt & Alt & Designado \\
+    Switch B & Alt & Alt & Alt & Designado \\
+    Switch C & Alt & Alt & Alt & Designado \\
+    Switch D & Root & Root & Root & --- \\
+    PC (todas) & Designado & Designado & Designado & Designado \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Rol de cada switch. "Alt" es corto para "Alternativo".}
+  \label{tab:spanning-tree-roles-before}
+\end{center}
+
+Una vez acabado de recopilar la informacion se paso a configurar el logging del switch
+B con el proposito de analisar la \textit{conversacion} entre los switches
+posteriormente. Esto se hizo usando los comandos mostrados en la terminal a
+continuacion llamada "Switch B: Configurando logging", una vez se corrieron, tambien se
+verifico la configuracion correcta usando \texttt{show debugging}.
+
+Posteriormente se uso uno de los computadores conectados con el comando \texttt{ping -t
+192.168.1.3}, se preparo un cronometro. Al desconectar el root bridge, se corrio el
+tiempo desde el primer paquete fallido por el \texttt{ping} y se paro cuando el
+\texttt{ping} volvio a recibir paquetes. El resultado fueron 24 segundos \textit{fuera
+de linea}.
+
+Finalmente se uso denuevo el mismo comando \texttt{show spanning-tree} para ver como
+cambiaron los roles de red. Los resultados, denuevo se dejan en la tabla
+\ref{tab:spanning-tree-after} y \ref{tab:spanning-tree-roles-after}. En estas se
+evidencia como el Switch C paso de ser el alternativo al root a falta del switch D.
+
+
+\begin{darkcode}[Switch B: Configurando logging]
+Switch-B#debug spanning-tree events
+'Spanning Tree event debugging is on'
+Switch-B#debug spanning-tree events root
+'Spanning Tree root changes debugging is on'
+Switch-B#debug spanning-tree root pvst+
+'Spanning Tree PVST+ debugging is on'
+Switch-B#debug spanning-tree pvst+ switch state
+'Spanning Tree Port state changes debugging is on'
+Switch-B#debug pm vp
+'Virtual port events debugging is on'
+Switch-B#debug spanning-tree bpdu receive
+'Spanning Tree BPDU Received debugging is on'
+Switch-B#debug spanning-tree bpdu receive transmit
+'Spanning Tree BPDU Transmitted debugging is on'
+Switch-B#debug spanning-tree bpdu
+'Spanning Tree Switch Shim process receive bpdu debugging is on'
+Switch-B#debug spanning-tree switch rx process decode
+'Spanning Tree Switch Shim decode received packets debugging is on'
+Switch-B#show debugging
+'
+Spanning Tree:
+  Spanning Tree BPDU Transmitted debugging is on
+  Spanning Tree BPDU Received debugging is on
+  Spanning Tree event debugging is on
+  Spanning Tree root changes debugging is on
+  Spanning Tree PVST+ debugging is on
+Spanning Tree Switch Shim:
+  Spanning Tree Port state changes debugging is on
+  Spanning Tree Switch Shim decode received packets debugging is on
+  Spanning Tree Switch Shim process receive bpdu debugging is on
+Port Manager:
+  Virtual port events debugging is on
+\end{darkcode}
+
+\begin{center}
+  \begin{tabular}{ l c c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C & Switch-D \\
+    \hline
+    MAC & \swaA & \swbA & \swcA & --- \\
+    BID & \swaA & \swbA & \swcA & --- \\
+    Root bridge & \swcA & \swcA & \swcA & --- \\
+    Path cost hasta\\ el Root bridge & 19 & 19 & --- & --- \\
+    Root port & Fa0/2 & Fa0/2 & No tiene & --- \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Informacion de cada switch acerca del Spanning Tree.}
+  \label{tab:spanning-tree-after}
+\end{center}
+
+\begin{center}
+  \begin{tabular}{ c c c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C \\
+    \hline
+    Switch-A & Alt & Alt & Designado \\
+    Switch B & Alt & Alt & Designado \\
+    Switch C & Root & Root & --- \\
+    PC (todas) & Designado & Designado & Designado \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Rol de cada switch. "Alt" es corto para "Alternativo".}
+  \label{tab:spanning-tree-roles-after}
+\end{center}
+
+\subsubsection*{Analisis de los archivos de logging}
+El archivo es demasiado largo para dejarsele en su totalidad, por lo que se resaltaran
+lineas claves, esto incluye la primeria linea que hace referencia al root switch
+estando caido:
+\begin{center}
+  \texttt{*Mar  1 01:53:44.870: *** vp\_linkchange: single: \textcolor{red}{down}: 1/3(1) }
+\end{center}
+La cual nos indica que el primer tiempo en el que la red vio el fallo fue en
+\texttt{53:44} (en formato \texttt{MM:SS}). Al principio, antes de apagar el switch D,
+se veia la siguiente linea
+\begin{center}
+  \texttt{*mar  1 01:53:42.999:     cfg p:0000 v:00 t:00 f:00 r:8001 \textcolor{red}{001c.f6b4.2480} ...}
+\end{center}
+La direccion MAC resaltada se reconoce como la del switch D, el switch root. Despues de
+que este mismo se apague sale esta linea inmediatamente
+\begin{center}
+  \texttt{*Mar  1 01:53:44.870: STP: VLAN0001 new root port Fa0/2, cost 23}
+\end{center}
+Esto significa que el switch C (el que esta en tal puerto) es el nuevo root casi
+inmediatamente despues de apagar el switch 2 segundos antes. Pero aun no esta
+funcionando el ping por que el protocolo STP aun requeriere que esperar 15 segundos en
+listening y 15 segundos en learning. Una vez pasado al rededor de ello (~24 segundos
+despues de desconectar el switch D), se ve el ping funcionando denuevo y el switch B ya
+no esta llamando ningun cambio de topologia como 
+
+\noindent\texttt{*Mar  1 01:54:02.998: STP SW: Gi0/1 new blocking req for 1 vlans}
+
+\noindent\texttt{*Mar  1 01:54:02.998: STP[1]: Generating TC trap for port GigabitEt...}
+
+\noindent\texttt{*Mar  1 01:54:02.998: STP: VLAN0001 Gi0/1 -> blocking}
