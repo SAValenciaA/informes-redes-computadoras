@@ -1,3 +1,188 @@
 % !TEX root =../main.tex
 
-\subsection*{Part B: RSTP}
+\subsection*{Part B: RPVST}
+La red se recontruyo desconectando los switches, verificando conexiones entre puertos
+y reestableciendo la corriente electrica. Se realizo de nuevo la configuración de hostname
+y de STP de la siguiente manera, utilizando como ejemplo el Switch-D :
+
+\begin{darkcode}[Switch-D: Configuracion basica]
+Switch>en
+Switch#conf
+Switch#configure t
+'Enter configuration commands, one per line.  End with CNTL/Z.'
+Switch(config)#hostnam
+Switch(config)#hostname Switch-D
+Switch-D(config)#exit
+Switch-D#
+Switch-D#config t
+'Enter configuration commands, one per line.  End with CNTL/Z.'
+Switch-D(config)#spanning-tree mode rapid-pvst 
+Switch-D(config)#exit  
+Switch-D#clear spanning-tree detected-protocols 
+Switch-D#show spanning-tree                     
+'
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     001d.7166.f180
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     001d.7166.f180
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- -------
+Fa0/2               Desg FWD 19        128.2    P2p 
+Fa0/3               Desg FWD 19        128.3    P2p 
+Gi0/2               Desg FWD 4         128.26   P2p 
+'
+\end{darkcode}
+
+Mediante el commando \texttt{show spanning-tree} se obtiene la información sobre la topología
+la cual se condensa en las tabla \ref{tab:RPVST_pre} y \ref{tab:ports_pre} :
+\begin{center}
+  \begin{tabular}{ l c c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C & Switch-D \\
+    \hline
+    MAC & \swaB & \swbB & \swcB & \swdB \\
+    BID Priority & 32769 & 32769  & 32769 & 32769 \\
+    BID MAC & \swaB & \swbB  & \swcB & \swdB \\
+    Root bridge & \swdB & \swdB & \swdB & Este es \\
+    Path cost hasta\\ el Root bridge & 19 & 19 & 25 & --- \\
+    Root port & Fa0/3 & Fa0/3 & Gi0/2 & No tiene \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Informacion de cada switch acerca del Spanning Tree.}
+  \label{tab:RPVST_pre}
+\end{center}
+\begin{center}
+  \begin{tabular}{ c c c c c }
+    \hline
+    \texttt{Puerto}            & Switch-A & Switch-B  & Switch-C  & Switch-D \\
+    \hline
+    \texttt{FastEthernet0/1}    & ---     & ---      & ---      & ---     \\
+    \texttt{GigabitEthernet0/1} & Designado & Alt  & ---  & --- \\
+    \texttt{GigabitEthernet0/2} & --- & ---  & Root  & Designado \\
+    \texttt{FastEthernet0/2}    & Alt & Alt  & Designado  & Designado \\
+    \texttt{FastEthernet0/3}    & Root & Root  & Designado  & Designado \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Rol de cada puerto en los switch. "Alt" es corto para "Alternativo".}
+  \label{tab:ports_pre}
+\end{center}
+El Root Bridge corresponde al Switch-D, la prioridad es igual para todos por lo que el desempate se determina
+con la dirección MAC, que en el caso de el Switch-D es la de menor valor.
+Respecto a la topolgía formada por PVST no se encuentra diferencia, los costos de cada switch al Root Bridge
+son iguales y ignorando que para la parte B se conecto un cable mal, Switch-D Gi0/2 <-> Switch-C Gi0/2
+en vez de Switch-D Gi0/1 <-> Switch-C Gi0/1 como se especifico en la tabla \ref{tab:conn}, los roles
+asignados a cada puerto son iguales.
+
+Luego se utilizo el Switch-B para realizar el debug, se utilizaron los siguientes comandos :
+\begin{darkcode}[Configuración de debug]
+Switch-B#
+Switch-B#ena
+Switch-B#config t
+'Enter configuration commands, one per line.  End with CNTL/Z.'
+Switch-B(config)#service timestamps debug datetime msec
+Switch-B(config)#service timestamps log datetime msec
+Switch-B(config)#no logging console
+Switch-B(config)#logging buffered 262144 debugging
+Switch-B(config)#exit  
+Switch-B#debug spanning-tree events
+'Spanning Tree event debugging is on'
+Switch-B#debug spanning-tree root
+'Spanning Tree root changes debugging is on'
+Switch-B#debug spanning-tree synchronization
+'Spanning Tree state sync support debugging is on'
+Switch-B#debug spanning-tree switch state
+'Spanning Tree Port state changes debugging is on'
+Switch-B#debug pm vp
+'Virtual port events debugging is on'
+Switch-B#debug spanning-tree bpdu receive 
+'Spanning Tree BPDU Received debugging is on'
+Switch-B#debug spanning-tre
+Switch-B#debug spanning-tree bpdu transmit
+'Spanning Tree BPDU Transmitted debugging is on'
+Switch-B#debug spanning-tree switch rx process
+'Spanning Tree Switch Shim process receive bpdu debugging is on'
+Switch-B#debug spanning-tree switch rx decode
+'Spanning Tree Switch Shim decode received packets debugging is on'
+Switch-B#show debugging
+'Spanning Tree:
+  Spanning Tree BPDU Transmitted debugging is on
+  Spanning Tree BPDU Received debugging is on
+  Spanning Tree event debugging is on
+  Spanning Tree root changes debugging is on
+  Spanning Tree state sync support debugging is on
+Spanning Tree Switch Shim:
+  Spanning Tree Port state changes debugging is on
+  Spanning Tree Switch Shim decode received packets debugging is on
+  Spanning Tree Switch Shim process receive bpdu debugging is on
+Port Manager:
+  Virtual port events debugging is on'
+\end{darkcode}
+
+Despues de realizar la configuración de debug se realizo el ejercicio de enviar mensajes ICMP desde el PC-B hasta
+el PC-C, los cuales no tiene conexion directa con el Root Bridge, Switch-D, se desconecto el cable de poder al 
+Switch-D y se espero hasta que los mensajes ICMP fueran satisfactorios de nuevo.
+
+La nueva topología se encuentra en las tablas \ref{tab:RPVST_post} y \ref{tab:ports_post} :
+
+\begin{center}
+  \begin{tabular}{ l c c c }
+    \hline
+    --- & Switch-A & Switch-B & Switch-C \\
+    \hline
+    MAC & \swaB & \swbB & \swcB \\
+    BID & \swaB + 32769 & \swbB + 32769  & \swcB + 32769 \\
+    Root bridge & Este es & \swaB & \swaB \\
+    Path cost hasta\\ el Root bridge & --- & 19 & 4 & --- \\
+    Root port & No tiene & Fa0/2 & Gi0/1 \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Informacion de cada switch acerca del Spanning Tree.}
+  \label{tab:RPVST_post}
+\end{center}
+\begin{center}
+  \begin{tabular}{ c c c c }
+    \hline
+    \texttt{Puerto}            & Switch-A & Switch-B     & Switch-C \\
+    \hline
+    \texttt{FastEthernet0/1}    & Designado & ---        & Designado \\
+    \texttt{GigabitEthernet0/1} & Designado & Root       & --- \\
+    \texttt{GigabitEthernet0/2} & ---       & ---        & ---   \\
+    \texttt{FastEthernet0/2}    & Designado & Designado  & Root   \\
+    \texttt{FastEthernet0/3}    & ---       & ---        & Alt  \\
+    \hline
+  \end{tabular}
+  \captionof{table}{Rol de cada puerto en los switch. "Alt" es corto para "Alternativo".}
+  \label{tab:ports_post}
+\end{center}
+El Root Bridge corresponde al Switch-A, la prioridad es igual para todos por lo que el desempate se determina
+con la dirección MAC, que en el caso de el Switch-A es la de menor valor. Sin embargo esto podria corresponder a 
+una topología creada desde cero, por lo que se debe realizar un analísis de el proceso de modificación de la topología
+mediante los BPDUs. 
+Respecto a la topolgía formada por PVST, en PVST se selecciona Switch-C como Root Bridge por lo que los puertos son tienen
+un rol diferente y los path cost varian.
+
+\subsubsection*{Analisis de los archivos de logging}
+En el archivo non-root-B.log linea 331 se indica que se desconecto el Switch-D : \\
+*Mar  1 00:48:43.958: RSTP(1): updt roles, root port Fa0/3 going down\\
+Luego el Switch-A manda una propuesta que el Switch-B acepta\\
+453 *Mar  1 00:48:44.738: RSTP(1): transmitting an agreement on Gi0/1 as a response to a proposal\\
+Luego manda una propouesta a Switch-C en su puerto. Esto se repite varias veces sin conseguir respuesta de Switch-C\\
+454 *Mar  1 00:48:44.738: RSTP(1): transmitting a proposal on Fa0/2\\
+Como el handshake debia ser inmediado y no lo fue, el switch B callo devuelva a depender en un timer en STP normal,
+hasta que C respondiese. Nunca lo hizo y los 20 segundos maximos del timer pasaron. No encontrando ninguna respuesta, 
+el switch B mando un TC trap.\\
+565 *Mar  1 00:48:59.737: RSTP(1): Fa0/2 fdwhile Expired\\
+Reseteando la topologia para rehacer los handshakes (arriesgando loops). Una vez la red se estabilizo, los pings de PC-B a PC-C volvieron.
+Probablemente mientras B no podia hacer el handshake con C, los PC-A y PC-C se podrian haber comunicado, pero como la prueba era de PC-B a
+ PC-A, justo los switches que se habian bloqueados entre ellos y el switch B aun no estaba seguro que la red era estable entonces ningun
+  ping paso y dio la apariencia de que rapid spanning tree era paradojica mente mas lento, cuando en realidad fue un fallo de sincronizacion.
+
+El tiempo contabilizado con cronometro fue de aproximadamente 24 segundos que no corresponde al tipico esperado para RSTP.
