@@ -1,3 +1,61 @@
 % !TEX root =../main.tex
 
 \section{Conclusiones}
+Las redes de comunicaciones complejas pueden conformarse por múltiples instancias de un
+mismo tipo de dispositivo, formando topologías que, a simple vista, podrían parecer
+redundantes o ineficientes. Cuando una topología contiene conexiones redundantes (por
+ejemplo, una malla donde cuatro dispositivos intermedios poseen tres conexiones entre
+sí), existe el riesgo crítico de generar bucles de red. Estos bucles, al circular
+paquetes de manera infinita, pueden provocar la caída del sistema en poco tiempo,
+independientemente de si se trata de un entorno de laboratorio o de una infraestructura
+corporativa con un flujo considerable de información.
+
+Para mitigar este riesgo, se implementa el protocolo STP (Spanning Tree Protocol), el
+cual opera de manera nativa en los switches. A través del escenario de prueba
+planteado, utilizando cuatro switches y cuatro terminales, fue posible observar el
+funcionamiento de este protocolo en un entorno real. Tras completar la configuración,
+se verificó la efectividad del protocolo mediante la elección de un Root Bridge y la
+identificación mutua entre conmutadores para habilitar la interacción. La estabilidad
+de la red se validó mediante pruebas ICMP (ping), confirmando que el tráfico recorre la
+topología redundante de manera exitosa y sin colisiones.
+
+Finalmente, es imperativo reconocer que una red redundante se diseña para garantizar la
+alta disponibilidad y la tolerancia a fallos. Para comprender la verdadera utilidad de
+STP, se evidenció la convergencia de la red tras un evento inesperado: la desconexión
+del Root Bridge. Este incidente forzó una reestructuración automática de los canales
+redundantes, demostrando que el protocolo es capaz de restablecer la conectividad y
+encontrar rutas alternativas en un tiempo mínimo, asegurando así la continuidad
+operativa del sistema.
+
+A diferencia del estándar STP (802.1D), cuyo proceso de convergencia depende de estados
+temporizados que pueden resultar lentos, el protocolo RSTP (Rapid Spanning Tree
+Protocol) introduce mecanismos de sincronización más ágiles. Mientras que el STP
+convencional debe esperar tiempos de escucha y aprendizaje, el RSTP utiliza un sistema
+de propuesta y acuerdo (handshake) entre switches vecinos para transicionar casi
+instantáneamente al estado de reenvío. Esta evolución permite que, en teoría, la
+topología se adapte a los cambios con una interrupción mínima, optimizando la
+disponibilidad de la infraestructura mediante la asignación de roles de puerto alternos
+y de respaldo.
+
+No obstante, durante el desarrollo de las pruebas en el escenario planteado, se
+presentó un comportamiento anómalo al evaluar la recuperación bajo el estándar RSTP.
+Tras forzar la caída del Root Bridge para observar la reestructuración de la red, se
+evidenció que uno de los dispositivos no respondió satisfactoriamente al proceso de
+sincronización. Este fallo en la comunicación técnica provocó que el equipo realizara
+un fallback automático hacia el protocolo STP original por razones de
+retrocompatibilidad. Como resultado, la topología tardó más tiempo en estabilizarse que
+en la prueba inicial de STP, demostrando que factores externos o inconsistencias en la
+negociación del hardware pueden degradar el rendimiento de protocolos que, en
+condiciones ideales, deberían ser superiores.
+
+
+A partir de este análisis, es posible concluir que una topología redundante ofrece la
+ventaja fundamental de la alta disponibilidad, permitiendo que la red encuentre rutas
+alternativas ante eventos inesperados. Sin embargo, su principal desventaja radica en
+la complejidad técnica que esto conlleva; la dependencia de protocolos de control
+introduce variables críticas donde un error de negociación puede generar tiempos de
+convergencia impredecibles. Esto resalta que la robustez de una red no solo depende de
+tener múltiples conexiones, sino de una configuración precisa y una compatibilidad
+total entre los equipos para garantizar que la recuperación sea tan eficiente como la
+teoría lo predice.
+
