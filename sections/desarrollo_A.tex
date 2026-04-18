@@ -196,18 +196,18 @@ El archivo es demasiado largo para dejarsele en su totalidad, por lo que se resa
 lineas claves, esto incluye la primeria linea que hace referencia al root switch
 estando caido:
 \begin{center}
-  \texttt{*Mar  1 01:53:44.870: *** vp\_linkchange: single: \textcolor{red}{down}: 1/3(1) }
+  [23]\texttt{*Mar  1 01:53:44.870: *** vp\_linkchange: single: \textcolor{red}{down}: 1/3(1) }
 \end{center}
 La cual nos indica que el primer tiempo en el que la red vio el fallo fue en
 \texttt{53:44} (en formato \texttt{MM:SS}). Al principio, antes de apagar el switch D,
 se veia la siguiente linea
 \begin{center}
-  \texttt{*mar  1 01:53:42.999:     cfg p:0000 v:00 t:00 f:00 r:8001 \textcolor{red}{001c.f6b4.2480} ...}
+  [9] \texttt{*Mar  1 01:53:42.999:     cfg p:0000 v:00 t:00 f:00 r:8001 \textcolor{red}{001c.f6b4.2480} ...}
 \end{center}
 La direccion MAC resaltada se reconoce como la del switch D, el switch root. Despues de
 que este mismo se apague sale esta linea inmediatamente
 \begin{center}
-  \texttt{*Mar  1 01:53:44.870: STP: VLAN0001 new root port Fa0/2, cost 23}
+  [19]\texttt{*Mar  1 01:53:44.870: STP: VLAN0001 new root port Fa0/2, cost 23}
 \end{center}
 Esto significa que el switch C (el que esta en tal puerto) es el nuevo root casi
 inmediatamente despues de apagar el switch 2 segundos antes. Pero aun no esta
@@ -216,8 +216,8 @@ listening y 15 segundos en learning. Una vez pasado al rededor de ello (~24 segu
 despues de desconectar el switch D), se ve el ping funcionando denuevo y el switch B ya
 no esta llamando ningun cambio de topologia como 
 
-\noindent\texttt{*Mar  1 01:54:02.998: STP SW: Gi0/1 new blocking req for 1 vlans}
+\noindent[277]\texttt{*Mar  1 01:54:02.998: STP SW: Gi0/1 new blocking req for 1 vlans}
 
-\noindent\texttt{*Mar  1 01:54:02.998: STP[1]: Generating TC trap for port GigabitEt...}
+\noindent[278]\texttt{*Mar  1 01:54:02.998: STP[1]: Generating TC trap for port GigabitEt...}
 
-\noindent\texttt{*Mar  1 01:54:02.998: STP: VLAN0001 Gi0/1 -> blocking}
+\noindent[279]\texttt{*Mar  1 01:54:02.998: STP: VLAN0001 Gi0/1 -> blocking}
